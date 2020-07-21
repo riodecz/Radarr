@@ -48,6 +48,10 @@ HtmlWebpackPlugin.prototype.injectAssetsIntoHtml = function(html, assets, assetT
 };
 
 const plugins = [
+  new webpack.IgnorePlugin({
+    resourceRegExp: /(fetch-cookie|node-fetch|tough-cookie)/
+  }),
+
   new OptimizeCssAssetsPlugin({}),
 
   new webpack.DefinePlugin({
