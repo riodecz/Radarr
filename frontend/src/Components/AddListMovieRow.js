@@ -113,7 +113,6 @@ class AddListMovieRow extends Component {
                   className={styles[name]}
                   status={status}
                   isExclusion={isExcluded}
-                  isExisting={isExisting}
                   component={VirtualTableRowCell}
                 />
               );
@@ -130,24 +129,6 @@ class AddListMovieRow extends Component {
                   >
                     {title}
                   </Link>
-
-                  {
-                    isExisting ?
-                      <Icon
-                        className={styles.alreadyExistsIcon}
-                        name={icons.CHECK_CIRCLE}
-                        title={'Already in your Library'}
-                      /> : null
-                  }
-
-                  {
-                    isExcluded ?
-                      <Icon
-                        className={styles.exclusionIcon}
-                        name={icons.DANGER}
-                        title={'Movie Excluded From Automatic Add'}
-                      /> : null
-                  }
                 </VirtualTableRowCell>
               );
             }
@@ -231,7 +212,7 @@ class AddListMovieRow extends Component {
                   className={styles[name]}
                 >
                   <NetImportListConnector
-                    lists={lists}
+                    tags={lists}
                   />
                 </VirtualTableRowCell>
               );

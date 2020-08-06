@@ -80,7 +80,6 @@ class AddListMoviePoster extends Component {
       year,
       overview,
       folder,
-      titleSlug,
       images,
       posterWidth,
       posterHeight,
@@ -96,7 +95,7 @@ class AddListMoviePoster extends Component {
       isExcludeMovieModalOpen
     } = this.state;
 
-    const linkProps = isExisting ? { to: `/movie/${titleSlug}` } : { onPress: this.onPress };
+    const linkProps = isExisting ? { to: `/movie/${tmdbId}` } : { onPress: this.onPress };
 
     const elementStyle = {
       width: `${posterWidth}px`,
@@ -217,7 +216,6 @@ AddListMoviePoster.propTypes = {
   overview: PropTypes.string.isRequired,
   folder: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
-  titleSlug: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   posterWidth: PropTypes.number.isRequired,
   posterHeight: PropTypes.number.isRequired,

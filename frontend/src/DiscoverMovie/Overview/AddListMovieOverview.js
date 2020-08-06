@@ -81,7 +81,6 @@ class AddListMovieOverview extends Component {
       imdbId,
       youTubeTrailerId,
       title,
-      titleSlug,
       folder,
       year,
       overview,
@@ -105,7 +104,7 @@ class AddListMovieOverview extends Component {
       height: `${posterHeight}px`
     };
 
-    const linkProps = isExisting ? { to: `/movie/${titleSlug}` } : { onPress: this.onPress };
+    const linkProps = isExisting ? { to: `/movie/${tmdbId}` } : { onPress: this.onPress };
 
     const contentHeight = getContentHeight(rowHeight, isSmallScreen);
     const overviewHeight = contentHeight - titleRowHeight;
@@ -143,6 +142,15 @@ class AddListMovieOverview extends Component {
               >
                 {title} { year > 0 ? `(${year})` : ''}
 
+                {
+                  isExisting ?
+                    <Icon
+                      className={styles.alreadyExistsIcon}
+                      name={icons.CHECK_CIRCLE}
+                      size={36}
+                      title={'Already in your Library'}
+                    /> : null
+                }
                 {
                   isExcluded &&
                     <Icon
@@ -225,7 +233,6 @@ AddListMovieOverview.propTypes = {
   year: PropTypes.number.isRequired,
   overview: PropTypes.string.isRequired,
   status: PropTypes.string.isRequired,
-  titleSlug: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   posterWidth: PropTypes.number.isRequired,
   posterHeight: PropTypes.number.isRequired,
