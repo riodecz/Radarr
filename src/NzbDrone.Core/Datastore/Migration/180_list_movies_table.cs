@@ -1,6 +1,5 @@
 using FluentMigrator;
 using NzbDrone.Core.Datastore.Migration.Framework;
-using NzbDrone.Core.Languages;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
@@ -9,6 +8,11 @@ namespace NzbDrone.Core.Datastore.Migration
     {
         protected override void MainDbUpgrade()
         {
+            Rename.Table("NetImport").To("ImportLists");
+            Rename.Table("NetImportStatus").To("ImportListStatus");
+
+            Execute.Sql("UPDATE Config SET Key = 'importlistsyncinterval' WHERE Key = 'netimportsyncinterval'");
+
             Create.TableForModel("ListMovies")
                 .WithColumn("ImdbId").AsString().Nullable()
                 .WithColumn("TmdbId").AsInt32()

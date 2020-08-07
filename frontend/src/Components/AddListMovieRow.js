@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import HeartRating from 'Components/HeartRating';
 import Icon from 'Components/Icon';
+import ImportListListConnector from 'Components/ImportListListConnector';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
-import NetImportListConnector from 'Components/NetImportListConnector';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
@@ -211,7 +211,7 @@ class AddListMovieRow extends Component {
                   key={name}
                   className={styles[name]}
                 >
-                  <NetImportListConnector
+                  <ImportListListConnector
                     tags={lists}
                   />
                 </VirtualTableRowCell>

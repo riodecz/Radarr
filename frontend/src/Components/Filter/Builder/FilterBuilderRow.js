@@ -6,9 +6,9 @@ import { filterBuilderTypes, filterBuilderValueTypes, icons } from 'Helpers/Prop
 import BoolFilterBuilderRowValue from './BoolFilterBuilderRowValue';
 import DateFilterBuilderRowValue from './DateFilterBuilderRowValue';
 import FilterBuilderRowValueConnector from './FilterBuilderRowValueConnector';
+import ImportListFilterBuilderRowValueConnector from './ImportListFilterBuilderRowValueConnector';
 import IndexerFilterBuilderRowValueConnector from './IndexerFilterBuilderRowValueConnector';
 import MovieStatusFilterBuilderRowValue from './MovieStatusFilterBuilderRowValue';
-import NetImportFilterBuilderRowValueConnector from './NetImportBuilderRowValueConnector';
 import ProtocolFilterBuilderRowValue from './ProtocolFilterBuilderRowValue';
 import QualityFilterBuilderRowValueConnector from './QualityFilterBuilderRowValueConnector';
 import QualityProfileFilterBuilderRowValueConnector from './QualityProfileFilterBuilderRowValueConnector';
@@ -75,8 +75,8 @@ function getRowValueConnector(selectedFilterBuilderProp) {
     case filterBuilderValueTypes.TAG:
       return TagFilterBuilderRowValueConnector;
 
-    case filterBuilderValueTypes.NETIMPORT:
-      return NetImportFilterBuilderRowValueConnector;
+    case filterBuilderValueTypes.IMPORTLIST:
+      return ImportListFilterBuilderRowValueConnector;
 
     default:
       return FilterBuilderRowValueConnector;

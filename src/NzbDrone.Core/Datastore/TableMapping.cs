@@ -17,6 +17,9 @@ using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
 using NzbDrone.Core.Extras.Subtitles;
 using NzbDrone.Core.History;
+using NzbDrone.Core.ImportLists;
+using NzbDrone.Core.ImportLists.ImportExclusions;
+using NzbDrone.Core.ImportLists.ListMovies;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.Instrumentation;
 using NzbDrone.Core.Jobs;
@@ -27,9 +30,6 @@ using NzbDrone.Core.Movies;
 using NzbDrone.Core.Movies.AlternativeTitles;
 using NzbDrone.Core.Movies.Credits;
 using NzbDrone.Core.Movies.Translations;
-using NzbDrone.Core.NetImport;
-using NzbDrone.Core.NetImport.ImportExclusions;
-using NzbDrone.Core.NetImport.ListMovies;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser.Model;
@@ -75,7 +75,7 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(i => i.SupportsSearch)
                   .Ignore(d => d.Tags);
 
-            Mapper.Entity<NetImportDefinition>("NetImport").RegisterModel()
+            Mapper.Entity<ImportListDefinition>("ImportLists").RegisterModel()
                   .Ignore(x => x.ImplementationName)
                   .Ignore(i => i.ListType)
                   .Ignore(i => i.Enable);
@@ -144,7 +144,7 @@ namespace NzbDrone.Core.Datastore
 
             Mapper.Entity<IndexerStatus>("IndexerStatus").RegisterModel();
             Mapper.Entity<DownloadClientStatus>("DownloadClientStatus").RegisterModel();
-            Mapper.Entity<NetImportStatus>("NetImportStatus").RegisterModel();
+            Mapper.Entity<ImportListStatus>("ImportListStatus").RegisterModel();
 
             Mapper.Entity<CustomFilter>("CustomFilters").RegisterModel();
 

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Core.ImportLists.ImportExclusions;
+using NzbDrone.Core.ImportLists.ListMovies;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Movies;
-using NzbDrone.Core.NetImport.ImportExclusions;
-using NzbDrone.Core.NetImport.ListMovies;
 using NzbDrone.Core.Organizer;
 using Radarr.Http;
 

@@ -117,7 +117,7 @@ class AddNewMovieSearchResult extends Component {
                     className={styles.exclusionIcon}
                     name={icons.DANGER}
                     size={36}
-                    title="Movie is on Net Import Exclusion List"
+                    title="Movie is on Import Exclusion List"
                   />
               }
             </div>

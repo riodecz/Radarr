@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import withScrollPosition from 'Components/withScrollPosition';
-import { addMovies, addNetImportExclusions, clearAddMovie, fetchDiscoverMovies, setListMovieFilter, setListMovieSort, setListMovieTableOption, setListMovieView } from 'Store/Actions/discoverMovieActions';
+import { addImportExclusions, addMovies, clearAddMovie, fetchDiscoverMovies, setListMovieFilter, setListMovieSort, setListMovieTableOption, setListMovieView } from 'Store/Actions/discoverMovieActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
-import { fetchNetImportExclusions } from 'Store/Actions/Settings/netImportExclusions';
+import { fetchImportExclusions } from 'Store/Actions/Settings/importExclusions';
 import scrollPositions from 'Store/scrollPositions';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createDiscoverMovieClientSideCollectionItemsSelector from 'Store/Selectors/createDiscoverMovieClientSideCollectionItemsSelector';
@@ -34,8 +34,8 @@ function createMapDispatchToProps(dispatch, props) {
       dispatch(fetchRootFolders());
     },
 
-    dispatchFetchNetImportExclusions() {
-      dispatch(fetchNetImportExclusions());
+    dispatchFetchImportExclusions() {
+      dispatch(fetchImportExclusions());
     },
 
     dispatchClearListMovie() {
@@ -66,8 +66,8 @@ function createMapDispatchToProps(dispatch, props) {
       dispatch(addMovies({ ids, addOptions }));
     },
 
-    dispatchAddNetImportExclusions(exclusions) {
-      dispatch(addNetImportExclusions(exclusions));
+    dispatchAddImportExclusions(exclusions) {
+      dispatch(addImportExclusions(exclusions));
     }
   };
 }
@@ -80,7 +80,7 @@ class DiscoverMovieConnector extends Component {
   componentDidMount() {
     registerPagePopulator(this.repopulate);
     this.props.dispatchFetchRootFolders();
-    this.props.dispatchFetchNetImportExclusions();
+    this.props.dispatchFetchImportExclusions();
     this.props.dispatchFetchListMovies();
   }
 
@@ -105,7 +105,7 @@ class DiscoverMovieConnector extends Component {
   }
 
   onExcludeMoviesPress =({ ids }) => {
-    this.props.dispatchAddNetImportExclusions({ ids });
+    this.props.dispatchAddImportExclusions({ ids });
   }
 
   //
@@ -127,13 +127,13 @@ class DiscoverMovieConnector extends Component {
 DiscoverMovieConnector.propTypes = {
   isSmallScreen: PropTypes.bool.isRequired,
   view: PropTypes.string.isRequired,
-  dispatchFetchNetImportExclusions: PropTypes.func.isRequired,
+  dispatchFetchImportExclusions: PropTypes.func.isRequired,
   dispatchFetchRootFolders: PropTypes.func.isRequired,
   dispatchFetchListMovies: PropTypes.func.isRequired,
   dispatchClearListMovie: PropTypes.func.isRequired,
   dispatchSetListMovieView: PropTypes.func.isRequired,
   dispatchAddMovies: PropTypes.func.isRequired,
-  dispatchAddNetImportExclusions: PropTypes.func.isRequired
+  dispatchAddImportExclusions: PropTypes.func.isRequired
 };
 
 export default withScrollPosition(

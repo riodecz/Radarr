@@ -354,7 +354,7 @@ namespace NzbDrone.Core.Movies
         public List<Movie> GetRecommendedMovies()
         {
             // Get all recommended movies, plus all movies on enabled lists
-            var netImportMovies = new List<Movie>();
+            var importListMovies = new List<Movie>();
 
             var allMovies = GetAllMovies();
 
@@ -367,10 +367,10 @@ namespace NzbDrone.Core.Movies
 
             foreach (var recommendation in distinctRecommendations)
             {
-                netImportMovies.Add(new Movie { TmdbId = recommendation });
+                importListMovies.Add(new Movie { TmdbId = recommendation });
             }
 
-            return netImportMovies;
+            return importListMovies;
         }
 
         public void Handle(MovieFileAddedEvent message)
