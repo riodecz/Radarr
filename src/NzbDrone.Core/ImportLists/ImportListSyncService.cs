@@ -1,12 +1,13 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Extensions;
+using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.ImportExclusions;
 using NzbDrone.Core.ImportLists.ListMovies;
 using NzbDrone.Core.Messaging.Commands;
-using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Movies;
 
 namespace NzbDrone.Core.ImportLists
@@ -19,90 +20,54 @@ namespace NzbDrone.Core.ImportLists
     {
         private readonly Logger _logger;
         private readonly IImportListFactory _importListFactory;
-        private readonly IImportListStatusService _importListStatusService;
+        private readonly IFetchAndParseImportList _listFetcherAndParser;
         private readonly IMovieService _movieService;
         private readonly IAddMovieService _addMovieService;
-        private readonly IListMovieService _listMovieService;
-        private readonly ISearchForNewMovie _movieSearch;
         private readonly IConfigService _configService;
         private readonly IImportExclusionsService _exclusionService;
 
         public ImportListSyncService(IImportListFactory importListFactory,
-                                      IImportListStatusService importListStatusService,
+                                      IFetchAndParseImportList listFetcherAndParser,
                                       IMovieService movieService,
                                       IAddMovieService addMovieService,
-                                      IListMovieService listMovieService,
-                                      ISearchForNewMovie movieSearch,
                                       IConfigService configService,
                                       IImportExclusionsService exclusionService,
                                       Logger logger)
         {
             _importListFactory = importListFactory;
-            _importListStatusService = importListStatusService;
+            _listFetcherAndParser = listFetcherAndParser;
             _movieService = movieService;
             _addMovieService = addMovieService;
-            _listMovieService = listMovieService;
-            _movieSearch = movieSearch;
             _exclusionService = exclusionService;
             _logger = logger;
             _configService = configService;
         }
 
-        private ImportListFetchResult GetListMovies()
+        private void SyncList(ImportListDefinition definition)
         {
-            var movies = new List<ListMovie>();
-            var anyFailure = false;
+            _logger.ProgressInfo(string.Format("Starting Import List Refresh for List {0}", definition.Name));
 
-            var importLists = _importListFactory.GetAvailableProviders();
-            var blockedLists = _importListStatusService.GetBlockedProviders().ToDictionary(v => v.ProviderId, v => v);
+            var result = _listFetcherAndParser.FetchSingleList(definition);
 
-            foreach (var list in importLists)
+            ProcessReports(result);
+        }
+
+        private void SyncAll()
+        {
+            var result = _listFetcherAndParser.Fetch();
+
+            if (_importListFactory.Enabled().Where(a => ((ImportListDefinition)a.Definition).EnableAuto).Empty())
             {
-                if (blockedLists.TryGetValue(list.Definition.Id, out ImportListStatus blockedListStatus))
-                {
-                    _logger.Debug("Temporarily ignoring list {0} till {1} due to recent failures.", list.Definition.Name, blockedListStatus.DisabledTill.Value.ToLocalTime());
-                    anyFailure |= true; //Ensure we don't clean if a list is down
-                    continue;
-                }
-
-                var result = list.Fetch();
-
-                if (!result.AnyFailure)
-                {
-                    // TODO some opportunity to bulk map here if we had the tmdbIds
-                    result.Movies.ToList().ForEach(x =>
-                    {
-                        // TODO some logic to avoid mapping everything (if its a tmdb in the db use the existing movie, etc..)
-                        MapMovieReport(x);
-                    });
-
-                    movies.AddRange(result.Movies);
-                    _listMovieService.SyncMoviesForList(result.Movies.ToList(), list.Definition.Id);
-                }
-
-                anyFailure |= result.AnyFailure;
+                _logger.Info("No auto enabled lists, skipping sync and cleaning");
+                return;
             }
 
-            _logger.Debug("Found {0} movies from list(s) {1}", movies.Count, string.Join(", ", importLists.Select(l => l.Definition.Name)));
-
-            return new ImportListFetchResult
+            if (!result.AnyFailure)
             {
-                Movies = movies.DistinctBy(x =>
-                {
-                    if (x.TmdbId != 0)
-                    {
-                        return x.TmdbId.ToString();
-                    }
+                CleanLibrary(result.Movies.ToList());
+            }
 
-                    if (x.ImdbId.IsNotNullOrWhiteSpace())
-                    {
-                        return x.ImdbId;
-                    }
-
-                    return x.Title;
-                }).ToList(),
-                AnyFailure = anyFailure
-            };
+            ProcessReports(result);
         }
 
         private void ProcessMovieReport(ImportListDefinition importList, ListMovie report, List<ImportExclusion> listExclusions, List<Movie> moviesToAdd)
@@ -150,34 +115,40 @@ namespace NzbDrone.Core.ImportLists
             }
         }
 
-        private void SyncAll()
+        private void ProcessReports(ImportListFetchResult listFetchResult)
         {
-            var result = GetListMovies();
-
-            //if there are no lists that are enabled for automatic import then dont do anything
-            if (_importListFactory.GetAvailableProviders().Where(a => ((ImportListDefinition)a.Definition).EnableAuto).Empty())
+            listFetchResult.Movies = listFetchResult.Movies.DistinctBy(x =>
             {
-                _logger.Info("No lists are enabled for auto-import.");
-                return;
-            }
+                if (x.TmdbId != 0)
+                {
+                    return x.TmdbId.ToString();
+                }
 
-            var listedMovies = result.Movies.ToList();
+                if (x.ImdbId.IsNotNullOrWhiteSpace())
+                {
+                    return x.ImdbId;
+                }
 
-            if (!result.AnyFailure)
-            {
-                CleanLibrary(listedMovies);
-            }
+                return x.Title;
+            }).ToList();
+
+            var listedMovies = listFetchResult.Movies.ToList();
 
             var importExclusions = _exclusionService.GetAllExclusions();
             var moviesToAdd = new List<Movie>();
 
-            foreach (var movie in listedMovies)
-            {
-                var importList = _importListFactory.Get(movie.ListId);
+            var groupedMovies = listedMovies.GroupBy(x => x.ListId);
 
-                if (movie.TmdbId != 0)
+            foreach (var list in groupedMovies)
+            {
+                var importList = _importListFactory.Get(list.Key);
+
+                foreach (var movie in list)
                 {
-                    ProcessMovieReport(importList, movie, importExclusions, moviesToAdd);
+                    if (movie.TmdbId != 0)
+                    {
+                        ProcessMovieReport(importList, movie, importExclusions, moviesToAdd);
+                    }
                 }
             }
 
@@ -189,37 +160,16 @@ namespace NzbDrone.Core.ImportLists
             _addMovieService.AddMovies(moviesToAdd, true);
         }
 
-        private void MapMovieReport(ListMovie report)
-        {
-            var mappedMovie = _movieSearch.MapMovieToTmdbMovie(new Movie { Title = report.Title, TmdbId = report.TmdbId, ImdbId = report.ImdbId, Year = report.Year });
-
-            if (mappedMovie != null)
-            {
-                report.TmdbId = mappedMovie.TmdbId;
-                report.ImdbId = mappedMovie.ImdbId;
-                report.Title = mappedMovie.Title;
-                report.SortTitle = mappedMovie?.SortTitle;
-                report.Year = mappedMovie.Year;
-                report.Overview = mappedMovie.Overview;
-                report.Ratings = mappedMovie.Ratings;
-                report.Studio = mappedMovie.Studio;
-                report.Certification = mappedMovie.Certification;
-                report.Collection = mappedMovie.Collection;
-                report.Status = mappedMovie.Status;
-                report.Images = mappedMovie.Images;
-                report.Website = mappedMovie.Website;
-                report.YouTubeTrailerId = mappedMovie.YouTubeTrailerId;
-                report.Translations = mappedMovie.Translations;
-                report.InCinemas = mappedMovie.InCinemas;
-                report.PhysicalRelease = mappedMovie.PhysicalRelease;
-                report.DigitalRelease = mappedMovie.DigitalRelease;
-                report.Genres = mappedMovie.Genres;
-            }
-        }
-
         public void Execute(ImportListSyncCommand message)
         {
-            SyncAll();
+            if (message.DefinitionId.HasValue)
+            {
+                SyncList(_importListFactory.Get(message.DefinitionId.Value));
+            }
+            else
+            {
+                SyncAll();
+            }
         }
 
         private void CleanLibrary(List<ListMovie> listMovies)

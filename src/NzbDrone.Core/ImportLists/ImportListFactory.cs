@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Composition;
@@ -10,7 +10,6 @@ namespace NzbDrone.Core.ImportLists
     public interface IImportListFactory : IProviderFactory<IImportList, ImportListDefinition>
     {
         List<IImportList> Enabled();
-
         List<IImportList> Discoverable();
     }
 
@@ -45,23 +44,13 @@ namespace NzbDrone.Core.ImportLists
         public List<IImportList> Enabled()
         {
             var enabledImporters = GetAvailableProviders().Where(n => ((ImportListDefinition)n.Definition).Enabled);
-            var indexers = FilterBlockedIndexers(enabledImporters);
-            return indexers.ToList();
+            return enabledImporters.ToList();
         }
 
         public List<IImportList> Discoverable()
         {
             var enabledImporters = GetAvailableProviders().Where(n => (n.GetType() == typeof(RadarrList.RadarrListImport) || n.GetType() == typeof(TMDb.Popular.TMDbPopularImport)));
-            var indexers = FilterBlockedIndexers(enabledImporters);
-            return indexers.ToList();
-        }
-
-        private IEnumerable<IImportList> FilterBlockedIndexers(IEnumerable<IImportList> importers)
-        {
-            foreach (var importer in importers)
-            {
-                yield return importer;
-            }
+            return enabledImporters.ToList();
         }
     }
 }

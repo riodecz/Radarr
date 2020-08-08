@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentValidation.Results;
 using NLog;
-using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.ListMovies;
 using NzbDrone.Core.Parser;
@@ -13,7 +12,12 @@ namespace NzbDrone.Core.ImportLists
 {
     public class ImportListFetchResult
     {
-        public IList<ListMovie> Movies { get; set; }
+        public ImportListFetchResult()
+        {
+            Movies = new List<ListMovie>();
+        }
+
+        public List<ListMovie> Movies { get; set; }
         public bool AnyFailure { get; set; }
     }
 
@@ -69,7 +73,7 @@ namespace NzbDrone.Core.ImportLists
             return null;
         }
 
-        protected virtual IList<ListMovie> CleanupListItems(IEnumerable<ListMovie> listMovies)
+        protected virtual List<ListMovie> CleanupListItems(IEnumerable<ListMovie> listMovies)
         {
             var result = listMovies.ToList();
 
