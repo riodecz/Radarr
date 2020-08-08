@@ -13,6 +13,8 @@ namespace NzbDrone.Core.Datastore.Migration
 
             Execute.Sql("UPDATE Config SET Key = 'importlistsyncinterval' WHERE Key = 'netimportsyncinterval'");
 
+            Alter.Table("ImportLists").AddColumn("SearchOnAdd").AsBoolean().WithDefaultValue(false);
+
             Create.TableForModel("ListMovies")
                 .WithColumn("ImdbId").AsString().Nullable()
                 .WithColumn("TmdbId").AsInt32()

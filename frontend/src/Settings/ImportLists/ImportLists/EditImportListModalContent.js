@@ -44,6 +44,7 @@ function EditImportListModalContent(props) {
     minimumAvailability,
     qualityProfileId,
     rootFolderPath,
+    searchOnAdd,
     tags,
     fields
   } = item;
@@ -116,6 +117,21 @@ function EditImportListModalContent(props) {
                   onChange={onInputChange}
                 />
               </FormGroup>
+
+              {
+                shouldMonitor &&
+                  <FormGroup>
+                    <FormLabel>Search on Add</FormLabel>
+
+                    <FormInputGroup
+                      type={inputTypes.CHECK}
+                      name="searchOnAdd"
+                      helpText="Search for movies on this list when added to Radarr"
+                      {...searchOnAdd}
+                      onChange={onInputChange}
+                    />
+                  </FormGroup>
+              }
 
               <FormGroup>
                 <FormLabel>Minimum Availability</FormLabel>

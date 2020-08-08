@@ -17,6 +17,7 @@ namespace NzbDrone.Core.ImportLists
         public MovieStatusType MinimumAvailability { get; set; }
         public int ProfileId { get; set; }
         public string RootFolderPath { get; set; }
+        public bool SearchOnAdd { get; set; }
         public override bool Enable => Enabled;
 
         public ImportListType ListType { get; set; }

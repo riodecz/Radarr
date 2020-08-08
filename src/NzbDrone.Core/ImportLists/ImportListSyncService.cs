@@ -109,7 +109,7 @@ namespace NzbDrone.Core.ImportLists
                     Tags = importList.Tags,
                     AddOptions = new AddMovieOptions
                     {
-                        SearchForMovie = monitored,
+                        SearchForMovie = monitored && importList.SearchOnAdd,
                     }
                 });
             }
